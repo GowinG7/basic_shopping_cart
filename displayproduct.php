@@ -40,10 +40,30 @@ $result = $conn->query($sql);
             color: green;
             font-weight: bold;
         }
-        
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+        }
+        .navbar a {
+            float: right;
+            display: block;
+            color: white;
+            padding: 14px 20px;
+            text-align: center;
+            text-decoration: none;
+        }
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
     </style>
 </head>
 <body>
+
+<!-- Navigation bar with 'My Cart' link -->
+<div class="navbar">
+    <a href="cart.php">My Shopping Cart</a>
+</div>
 
 <h2 style="text-align:center;">Product List</h2>
 
@@ -65,17 +85,17 @@ $result = $conn->query($sql);
                         echo 'Not available';
                     }
                     else{                    
-                           echo htmlspecialchars($row['discount']);
+                           echo htmlspecialchars($row['discount']) . '%' ;
                         }
                     echo '</p>';
             echo '<p class="price">Rs. ' . htmlspecialchars($row['price']) . '</p>';
             echo '<p>In Stock: ' . htmlspecialchars($row['quantity']) . ' pieces</p>';
 
-            echo '<form method="POST" action="cart.php">';
+            // Add to Cart Form
+            echo '<form method="GET" action="cart.php">';
             echo '<input type="hidden" name="pid" value="' . htmlspecialchars($row['id']) . '">';
-            echo '<button type="submit" name="add_to_cart">Add to Cart</button>';
+            echo '<button type="submit" name="cart">Add to Cart</button>';
             echo '</form>';
-
 
             echo '</div>';
         }
