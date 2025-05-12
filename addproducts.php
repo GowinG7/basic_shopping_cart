@@ -10,6 +10,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])){
     $pcategory = $_POST['pcategory'];
     $discount = $_POST['discount'];
     $description = $_POST['desc'];
+    $shipping = $_POST['shipping'];
 
     //image upload handling
     $imagename = $_FILES['image']['name'];
@@ -22,7 +23,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])){
     //Move the uploaded file to the folder
     if (move_uploaded_file($imagetmp, $uploadpath)) {
 
-        $sql = "insert into products(id, name, category,  price, discount, quantity, image, description) values('$pid','$name','$pcategory','$price','$discount','$quan','$imageNewname','$description') ";
+        $sql = "insert into products(id, name, category,  price, discount,shipping, quantity, image, description) values('$pid','$name','$pcategory','$price','$discount','$shipping','$quan','$imageNewname','$description') ";
 
         $result = $conn->query($sql);
 
@@ -85,6 +86,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])){
         <input type="text" id="price" name="price" required><br><br>
         <label for="discount">Discount:</label>&nbsp;&nbsp;&nbsp;&nbsp;
         <input type="number" id="discount" name="discount"><br><br>
+        <label for="shipping">Shipping Cost:</label>&nbsp;&nbsp;
+        <input type="number" id="shipping" name="shipping" ><br><br>
         <label for="quantity">Quantity:</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <input type="number" id="quantity" name="quantity" required><br><br>
         <label for="image">Image:</label>&nbsp;&nbsp;

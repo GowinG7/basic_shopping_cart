@@ -77,19 +77,30 @@ $result = $conn->query($sql);
                     alt="Product Image">';
 
             echo '<h3>' . htmlspecialchars($row['name']) . '</h3>';
-            echo '<p class="category">Category: ' . htmlspecialchars($row['category']) . '</p>';
-            echo '<p class="category">Description: ' . htmlspecialchars($row['description']) . '</p>';
-
-            echo '<p class="category">Discount offer: ';
-                    if($row['discount'] == 0 ){
-                        echo 'Not available';
-                    }
-                    else{                    
-                           echo htmlspecialchars($row['discount']) . '%' ;
-                        }
-                    echo '</p>';
-            echo '<p class="price">Rs. ' . htmlspecialchars($row['price']) . '</p>';
             echo '<p>In Stock: ' . htmlspecialchars($row['quantity']) . ' pieces</p>';
+
+            echo '<p>Category: ' . htmlspecialchars($row['category']) . '</p>';
+            echo '<p>Description: ' . htmlspecialchars($row['description']) . '</p>';
+
+            echo '<p class="price">Rs. ' . htmlspecialchars($row['price']) . '</p>';
+
+            echo '<p >Discount offer: ';
+                if($row['discount'] == 0 ){
+            echo 'Not available';
+                }
+            else{                    
+                echo htmlspecialchars($row['discount']) . '% ' ;
+            }
+            echo '</p>';
+
+            echo '<p>Shipping Cost: ';
+                if($row['shipping'] == 0 ){
+                     echo 'Free';
+                    }
+                else{                    
+                    echo htmlspecialchars($row['shipping']) ;
+                    }
+            echo '</p>';
 
             // Add to Cart Form
             echo '<form method="GET" action="cart.php">';

@@ -146,7 +146,7 @@ if (isset($_GET['remove']) && isset($_GET['pid'])) {
                     $grand_total += $item_total;
                 ?>
                     <tr>
-                        <td style="padding: 0; margin: 0; width: 100px; height: 100px;">
+                        <td >
                             <img src="productimage/<?php echo htmlspecialchars($item['image']); ?>" 
                             style="width: 100%; height: 100%; object-fit: cover; display: block; border: none;" 
                             alt="Product Image">
@@ -155,6 +155,7 @@ if (isset($_GET['remove']) && isset($_GET['pid'])) {
                         <td><?php echo htmlspecialchars($item['name']); ?></td>
                         <td><?php echo htmlspecialchars($item['description']); ?></td>
                         <td><?php echo htmlspecialchars($item['category']); ?></td>
+    
                         <td>Rs. <?php echo number_format($item['price'], 2); ?></td>
                         <td>
                             <?php
