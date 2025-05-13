@@ -134,12 +134,12 @@
                 </tbody>
         </table>
 
-        <div class="total">
+        <div class="total" style="display: flex; gap:10%;">
             <p>Grand Total: Rs. <?php echo number_format($grand_total,2) ?></p>
        
             <!-- Order Now button -->
-            <form method="POST" action="order.php" style="display: inline;">
-                <button type="submit" name="order_now" class="btn">Order Now</button>
+            <form method="POST" action="order.php">
+                <button type="submit" name="order" style="padding:5px; margin-top:10px; cursor:pointer;background-color: skyblue;">Order Now</button>
             </form>
 
         </div>
