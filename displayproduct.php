@@ -62,7 +62,7 @@ $result = $conn->query($sql);
 
 <!-- Navigation bar with 'My Cart' link -->
 <div class="navbar">
-    <a href="cart.php">My Shopping Cart</a>
+    <a href="displaycart.php">My Shopping Cart</a>
 </div>
 
 <h2 style="text-align:center;">Product List</h2>
@@ -82,7 +82,7 @@ $result = $conn->query($sql);
             echo '<p>Category: ' . htmlspecialchars($row['category']) . '</p>';
             echo '<p>Description: ' . htmlspecialchars($row['description']) . '</p>';
 
-            echo '<p class="price">Rs. ' . htmlspecialchars($row['price']) . '</p>';
+            echo '<p class="price">Original price: Rs. ' . htmlspecialchars($row['price']) . '</p>';
 
             echo '<p >Discount offer: ';
                 if($row['discount'] == 0 ){
@@ -101,6 +101,16 @@ $result = $conn->query($sql);
                     echo htmlspecialchars($row['shipping']) ;
                     }
             echo '</p>';
+
+
+            $originalPrice = $row['price'];
+            $discount = $row['discount'];
+            $shipping = $row['shipping'];
+            $discountAmount = ($discount / 100) * $originalPrice;
+            $buyingCost = $originalPrice - $discountAmount + $shipping;
+
+            echo '<p class="price">Buying Cost: Rs. ' . number_format($buyingCost, 2) . '</p>';
+
 
             // Add to Cart Form
             echo '<form method="GET" action="cart.php">';
