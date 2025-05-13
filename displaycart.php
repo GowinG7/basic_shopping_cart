@@ -138,7 +138,7 @@
             <p>Grand Total: Rs. <?php echo number_format($grand_total,2) ?></p>
        
             <!-- Order Now button -->
-            <form method="POST" action="order.php">
+            <form method="POST" action="order_form.php">
                 <button type="submit" name="order" style="padding:5px; margin-top:10px; cursor:pointer;background-color: skyblue;">Order Now</button>
             </form>
 
