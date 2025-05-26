@@ -48,7 +48,7 @@ session_start();
         <p>Your order ID is: <strong><?php echo htmlspecialchars($_GET['order_id']); ?></strong></p>
     <?php endif; ?>
     <p>We will contact you soon for delivery.</p>
-    <a href="displayproduct.php" class="btn">Continue Shopping</a>
+    <a href="index.php" class="btn">Continue Shopping</a>
 </div>
 
 </body>

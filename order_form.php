@@ -1,5 +1,7 @@
 <?php
 session_start();
+include("header.php");
+
 if (!isset($_SESSION['cart']) || count($_SESSION['cart']) === 0) {
     header("Location: displaycart.php");
     exit();
@@ -12,6 +14,18 @@ if (!isset($_SESSION['cart']) || count($_SESSION['cart']) === 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Place order</title>
+
+    <style>
+        table{
+            border-collapse: collapse;
+        }
+        th{
+            color: blue;
+        }
+        th,td,tr{
+            border: 1px solid black;
+        }
+    </style>
 </head>
 <body>
 
@@ -28,7 +42,7 @@ if (!isset($_SESSION['cart']) || count($_SESSION['cart']) === 0) {
     </select><br><br>
 
     <h3>Your Cart Items:</h3>
-    <table border="1">
+    <table>
         <tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr>
         <?php
         $grand_total = 0;
@@ -45,7 +59,7 @@ if (!isset($_SESSION['cart']) || count($_SESSION['cart']) === 0) {
             </tr>";
         }
         ?>
-        <tr><td colspan="3"><b>Grand Total</b></td><td><b id="grand_total"><?= $grand_total ?></b></td></tr>
+        <tr style="color: Green;"><td colspan="3" ><b>Grand Total</b></td><td><b id="grand_total"><?= $grand_total ?></b></td></tr>
     </table>
     <br>
     <button type="submit" name="submit_order">Place Order</button>

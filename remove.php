@@ -1,24 +1,28 @@
 <?php
 session_start();
+include("dbconnect.php");
 
-// Redirect early if pid is not set
-if (!isset($_GET['pid'])) {
-    header("Location: displaycart.php");
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
     exit();
 }
 
-$pid = $_GET['pid'];
+if (isset($_GET['pid'])) {
+    $user_id = $_SESSION['user_id'];
+    $pid = $_GET['pid'];
 
-// Loop through cart items and remove the item that matches the product ID
-foreach ($_SESSION['cart'] as $key => $item) {
-    if ($item['id'] == $pid) {
-        unset($_SESSION['cart'][$key]);
-        $_SESSION['cart'] = array_values($_SESSION['cart']); // Reindex the array
-        break;
+    // Delete the product from the cart_items table
+    $delete = mysqli_query($conn, "DELETE FROM cart_items WHERE user_id = $user_id AND product_id = $pid");
+
+    if ($delete) {
+        header("Location: displaycart.php");
+        exit();
+    } else {
+        echo "Failed to remove item from cart.";
     }
+} else {
+    header("Location: displaycart.php");
+    exit();
 }
-
-// Redirect back to displaycart.php after removal
-header("Location: displaycart.php");
-exit();
 ?>

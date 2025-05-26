@@ -1,23 +1,34 @@
 <?php
 session_start();
+include("dbconnect.php");
 
-// UPDATE QUANTITY
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_quantity'])) {
-    $pid = intval($_POST['pid']);
-    $newQty = max(1, intval($_POST['quantity'])); // Ensure at least 1
-
-    if (!isset($_SESSION['cart'])) {
-        $_SESSION['cart'] = [];
-    }
-
-    foreach ($_SESSION['cart'] as &$item) {
-        if ($item['id'] == $pid) {
-            $item['quantity'] = $newQty;
-            break;
-        }
-    }
-
-    header("Location: displaycart.php");
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
     exit();
+}
+
+// When update quantity form is submitted
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_quantity'])) {
+    $pid = (int)$_POST['pid'];
+    $newQty = (int)$_POST['quantity'];
+
+    // Ensure minimum quantity is 1
+    if ($newQty < 1) {
+        $newQty = 1;
+    }
+
+    $user_id = $_SESSION['user_id'];
+
+    // Update the quantity in the database
+    $query = "UPDATE cart_items SET quantity = $newQty WHERE user_id = $user_id AND product_id = $pid";
+    $result = mysqli_query($conn, $query);
+
+    if ($result) {
+        header("Location: displaycart.php");
+        exit();
+    } else {
+        echo "Failed to update quantity.";
+    }
 }
 ?>

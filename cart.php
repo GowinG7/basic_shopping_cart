@@ -2,54 +2,33 @@
 session_start();
 include("dbconnect.php");
 
-// Add product to cart
+// Check login
+if (!isset($_SESSION['user_id'])) {
+    echo "<script>alert('Please log in to add items to your cart.'); window.location.href='index.php';</script>";
+    exit();
+}
+
+
+$user_id = $_SESSION['user_id'];
+
 if (isset($_GET['cart']) && isset($_GET['pid'])) {
     $pid = $_GET['pid'];
 
-    // Fetch product details from the database
-    $query = "SELECT * FROM products WHERE id = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $pid);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $product = $result->fetch_assoc();
+    // Check if product exists
+    $product_check = mysqli_query($conn, "SELECT id FROM products WHERE id = $pid");
+    
+    if (mysqli_num_rows($product_check) > 0) {
+        // Check if product is already in cart
+        $cart_check = mysqli_query($conn, "SELECT * FROM cart_items WHERE user_id = $user_id AND product_id = $pid");
 
-    // Debugging: check if product is found
-    var_dump($product); // Check if this gives the expected product data
-
-    if ($product) {
-        $cartItem = [
-            'id' => $product['id'],
-            'name' => $product['name'],
-            'price' => $product['price'],
-            'description' => $product['description'],
-            'category' => $product['category'],
-            'discount' => $product['discount'],
-            'quantity' => 1, // Default to 1
-            'image' => $product['image'],
-            'shipping' => $product['shipping']
-        ];
-
-        // Initialize cart session if it doesn't exist
-        if (!isset($_SESSION['cart'])) {
-            $_SESSION['cart'] = [];
+        if (mysqli_num_rows($cart_check) > 0) {
+            // Already exists → increase quantity
+            mysqli_query($conn, "UPDATE cart_items SET quantity = quantity + 1 WHERE user_id = $user_id AND product_id = $pid");
+        } else {
+            // Not in cart → insert new item
+            mysqli_query($conn, "INSERT INTO cart_items (user_id, product_id, quantity) VALUES ($user_id, $pid, 1)");
         }
 
-        $found = false;
-        //loop to check if item already exits
-        foreach ($_SESSION['cart'] as &$item) {
-            if ($item['id'] == $pid) {
-                $item['quantity']++; //increment quantity if found
-                $found = true;
-                break;
-            }
-        }
-        //if not found , add new product to cart
-        if (!$found) {
-            $_SESSION['cart'][] = $cartItem;
-        }
-
-        // Redirect to cart page
         header("Location: displaycart.php");
         exit();
     } else {
