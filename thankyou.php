@@ -1,8 +1,7 @@
 <?php
-// Optional: Start session if you want to show user info
 session_start();
+$order_id = isset($_GET['order_id']) && is_numeric($_GET['order_id']) ? $_GET['order_id'] : null;
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,10 +43,20 @@ session_start();
 
 <div class="thankyou-box">
     <h2>Thank you for your order!</h2>
-    <?php if (isset($_GET['order_id'])): ?>
-        <p>Your order ID is: <strong><?php echo htmlspecialchars($_GET['order_id']); ?></strong></p>
-    <?php endif; ?>
-    <p>We will contact you soon for delivery.</p>
+
+    <?php 
+        if ($order_id){
+            echo "<p>Your Order ID is: <strong>" . htmlspecialchars($order_id) . "</strong></p>";
+        }else{
+            echo "<p><strong>Order ID is not available.</strong></p>";
+        }
+        if (isset($_SESSION['username'])){
+            echo "<p>Dear <strong>" . htmlspecialchars($_SESSION['username']) . "</strong>, we will contact you shortly.</p>";
+        }else{
+            echo "<p>We will contact you soon for delivery.</p>";
+        }
+        ?>
+
     <a href="index.php" class="btn">Continue Shopping</a>
 </div>
 

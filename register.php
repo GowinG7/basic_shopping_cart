@@ -7,7 +7,7 @@ if (isset($_POST['register'])) {
 
     $sql = "INSERT INTO users (username, password) VALUES ('$username', '$password')";
     mysqli_query($conn, $sql);
-    echo "Registration successful. <a href='login.php'>Login</a>";
+    echo "Registration successful.";
 }
 ?>
 

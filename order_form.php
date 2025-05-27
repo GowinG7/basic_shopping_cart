@@ -1,40 +1,61 @@
 <?php
 session_start();
-include("header.php");
+include("dbconnect.php");
 
-if (!isset($_SESSION['cart']) || count($_SESSION['cart']) === 0) {
+// Redirect if not logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+// Fetch cart items for the logged-in user
+$result = mysqli_query($conn, "SELECT * FROM cart_items WHERE user_id = $user_id");
+
+if (!$result || mysqli_num_rows($result) == 0) {
     header("Location: displaycart.php");
     exit();
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Place order</title>
-
+    <title>Place Order</title>
     <style>
-        table{
+        table {
             border-collapse: collapse;
+            width: 100%;
         }
-        th{
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
             color: blue;
         }
-        th,td,tr{
-            border: 1px solid black;
+        img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
         }
     </style>
 </head>
 <body>
 
-<h2>Fill in Delivery Details</h2>
-<form id="orderForm" action="place_order.php" method="post">
-    <label>Location:</label><br>
-    <input type="text" name="location" required><br><br>
+<h2>Delivery Details</h2>
 
-    <label>Payment Option:</label><br>
+<form id="orderForm" action="place_order.php" method="post">
+
+    <label for="customer_name">Your Name:</label><br>
+    <input type="text" id="customer_name" name="name" required><br><br>
+
+    <label for="location">Delivery Location:</label><br>
+    <input type="text" id="location" name="location" required><br><br>
+
+    <label for="payment_option">Payment Option:</label><br>
     <select name="payment_option" id="payment_option" required>
         <option value="">Select</option>
         <option value="Cash on Delivery">Cash on Delivery</option>
@@ -43,48 +64,63 @@ if (!isset($_SESSION['cart']) || count($_SESSION['cart']) === 0) {
 
     <h3>Your Cart Items:</h3>
     <table>
-        <tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+        <tr>
+            <th>Image</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Discount (%)</th>
+            <th>Shipping</th>
+            <th>Total</th>
+        </tr>
+
         <?php
         $grand_total = 0;
-        foreach ($_SESSION['cart'] as $item) {
-            $discount = ($item['discount'] / 100) * $item['price'];
-            $price = $item['price'] - $discount + $item['shipping'];
-            $total = $price * $item['quantity'];
+
+        while ($item = mysqli_fetch_assoc($result)) {
+            $product_name = isset($item['pname']) ? $item['pname'] : 'Unknown';
+            $image = isset($item['image']) ? $item['image'] : '';
+            $qty = (int)$item['quantity'];
+            $price = (float)$item['price'];
+            $discount = (float)$item['discount'];
+            $shipping = (float)$item['shipping'];
+
+            $discount_amount = ($discount / 100) * $price;
+            $final_price = $price - $discount_amount + $shipping;
+            $total = $final_price * $qty;
             $grand_total += $total;
+
             echo "<tr>
-                <td>{$item['name']}</td>
-                <td>{$item['quantity']}</td>
-                <td>{$price}</td>
-                <td>{$total}</td>
+                <td><img src='productimage/{$image}' alt='Product'></td>
+                <td>" . htmlspecialchars($product_name) . "</td>
+                <td>$qty</td>
+                <td>Rs. " . number_format($price, 2) . "</td>
+                <td>" . number_format($discount, 1) . "%</td>
+                <td>Rs. " . number_format($shipping, 2) . "</td>
+                <td>Rs. " . number_format($total, 2) . "</td>
             </tr>";
         }
         ?>
-        <tr style="color: Green;"><td colspan="3" ><b>Grand Total</b></td><td><b id="grand_total"><?= $grand_total ?></b></td></tr>
+
+        <tr style="color: green;">
+            <td colspan="6"><b>Grand Total</b></td>
+            <td><b id="grand_total"><?php echo number_format($grand_total, 2); ?></b></td>
+        </tr>
     </table>
+
     <br>
     <button type="submit" name="submit_order">Place Order</button>
 </form>
 
+<!-- E-Sewa Payment Handling -->
 <script>
-document.getElementById('orderForm').addEventListener('submit', function(event) {
-    var paymentOption = document.getElementById('payment_option').value;
-    
-    // If "Online Payment" is selected, redirect to E-Sewa
-    if (paymentOption === 'Online Payment') {
-        event.preventDefault();  // Prevent the form from submitting right away
-
-        var orderId = '12345';  // Replace with dynamic order ID
-        var totalAmount = document.getElementById('grand_total').innerText;  // Grand total is in text, not value
-        
-        // E-Sewa URL and parameters (replace with real E-Sewa URL)
-        var esewaUrl = 'https://www.esewa.com.np/epay/main';
-        var esewaParams = '?amt=' + totalAmount + '&pidx=' + orderId;  // Add required params
-
-        // Construct full URL for redirection
-        var redirectUrl = esewaUrl + esewaParams;
-
-        // Redirect to the E-Sewa payment gateway
-        window.location.href = redirectUrl;
+document.getElementById("orderForm").addEventListener("submit", function(e) {
+    var paymentOption = document.getElementById("payment_option").value;
+    if (paymentOption === "Online Payment") {
+        e.preventDefault();
+        let amt = document.getElementById("grand_total").innerText.replace(/[^\d.]/g, '');
+        let orderId = 'ORD' + Date.now();
+        window.location.href = "https://www.esewa.com.np/epay/main?amt=" + amt + "&pidx=" + orderId;
     }
 });
 </script>
