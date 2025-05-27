@@ -39,7 +39,7 @@
 
   <div class="user-info">
     <?php if (isset($_SESSION['user_id'])){ 
-      echo '<span>Welcome, ' . htmlspecialchars($_SESSION['username']) . '</span>';
+      echo '<span>Welcome, ' . htmlspecialchars($_SESSION['name']) . '</span>';
       echo '<a href="logout.php">Logout</a>';
     } else{
       echo '<a href="login.php">Login</a>';

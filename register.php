@@ -1,13 +1,19 @@
 <?php
-include 'dbconnect.php';
+include ("dbconnect.php");
 
-if (isset($_POST['register'])) {
+if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['register'])) {
+    $nam = $_POST['nam'];
+    $phone = $_POST['phone'];
     $username = $_POST['uname'];
     $password = password_hash($_POST['pass'], PASSWORD_DEFAULT);
 
-    $sql = "INSERT INTO users (username, password) VALUES ('$username', '$password')";
-    mysqli_query($conn, $sql);
-    echo "Registration successful.";
+    $sql = "INSERT INTO users (name,phone,username, password) VALUES ('$nam','$phone','$username', '$password')";
+    if (mysqli_query($conn, $sql)) {
+        echo "Registration successful.";
+    }else{
+        echo "Error: " . mysqli_error($conn);
+        exit();
+    }
 }
 ?>
 
@@ -40,16 +46,25 @@ if (isset($_POST['register'])) {
             cursor: pointer;
             color: blue;
         }
+        nam{
+            margin-left: 20px;
+        }
     </style>
 </head>
 <body>
 <form method="POST" action="">
     <h2 style="color: green;" >User Registration</h2>
+    
+    <label for="nam">Name:</label> 
+    <input type="text" name="nam" id="nam" placeholder="Full Name" required><br><br>
+    <label for="phone">Phone:</label>
+    <input type="text" name="phone" id="phone" placeholder="Your phone number" required><br><br>
     <label for="uname">Username:</label>
     <input type="text" id="uname" name="uname" required placeholder="Username"><br><br>
     <label for="pass">Password:</label>
     <input type="password" id="pass" name="pass" required placeholder="Password"> <br><br>
     <button type="submit" name="register">Register</button>
+    <button type="reset">Reset</button>
     <hr>
     <div class="footer">
         <p>Already have an account? <a href="login.php">Log In</a> </p>

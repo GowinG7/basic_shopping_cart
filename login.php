@@ -1,20 +1,28 @@
 <?php
 session_start();
-include 'dbconnect.php';
+include("dbconnect.php");
 
-if (isset($_POST['login'])) {
-    $username = $_POST['uname'];
-    $password = $_POST['pass'];
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
+    $uname = $_POST['uname'];
+    $pass = $_POST['pass'];
 
-    $res = mysqli_query($conn, "SELECT * FROM users WHERE username='$username'");
-    $row = mysqli_fetch_assoc($res);
+    $query = "SELECT * FROM users WHERE username = '$uname'";
+    $result = mysqli_query($conn, $query);
 
-    if ($row && password_verify($password, $row['password'])) {
-        $_SESSION['user_id'] = $row['id'];
-        $_SESSION['username'] = $row['username'];
-        header("Location: index.php");
+    if ($result && mysqli_num_rows($result) > 0) {
+        $row = mysqli_fetch_assoc($result);
+
+        if (password_verify($pass, $row['password'])) {
+            $_SESSION['user_id'] = $row['id'];
+            $_SESSION['username'] = $row['username'];
+            $_SESSION['name'] = $row['name'];
+            header("Location: index.php");
+            exit();
+        } else {
+            echo "Incorrect password.";
+        }
     } else {
-        echo "Invalid login.";
+        echo "Username not found.";
     }
 }
 ?>
@@ -23,45 +31,54 @@ if (isset($_POST['login'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Login</title>
     <style>
-        body{
+        body {
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        form{
+        form {
             border: 1px solid black;
             border-radius: 7px;
-            padding: 10px;
+            padding: 15px;
         }
-        .footer a{
-            color: green;
+        label, input {
+           
+            margin-bottom: 10px;
         }
-        .footer p{
-            color: black;
-        }
-        button{
-            font-size: 17px;
+        button {
+            font-size: 14px;
+            padding: 5px 10px;
             cursor: pointer;
             color: blue;
+        }
+        .footer {
+            margin-top: 15px;
+        }
+        .footer a {
+            color: green;
         }
     </style>
 </head>
 <body>
-    <form method="POST" action="">
-    <h2 style="color: green;" >User login</h2>
+
+<form method="POST" action="">
+    <h2 style="color: green;">User Login</h2>
+
     <label for="uname">Username:</label>
-    <input type="text" id="uname" name="uname" required placeholder="Username"><br><br>
+    <input type="text" id="uname" name="uname" required placeholder="Enter username">
+        <br>
     <label for="pass">Password:</label>
-    <input type="password" id="pass" name="pass" required placeholder="Password"> <br><br>
-    <button type="submit" name="login">login</button>
-    <hr>
+    <input type="password" id="pass" name="pass" required placeholder="Enter password">
+        <br>
+    <button type="submit" name="login">Login</button>
+        <hr>
     <div class="footer">
-        <p>Don't have an account? <a href="register.php">Register</a> </p>
+        <p>Don't have an account? <a href="register.php">Register</a></p>
     </div>
-</form> 
+</form>
+
 </body>
 </html>
