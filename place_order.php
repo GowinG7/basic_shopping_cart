@@ -49,8 +49,11 @@ while ($row = mysqli_fetch_assoc($cart_query)) {
     ];
 }
 
-$order_sql = "INSERT INTO orders (user_id, grand_total, location, name, payment_status, order_status)
-              VALUES ($user_id, $grand_total, '$location', '$name', 'Cash on Delivery', 'Pending')";
+$order_sql = "INSERT INTO orders 
+(grand_total, payment_option, location, payment_status, order_date, name, user_id, order_status)
+VALUES 
+($grand_total, 'Cash on Delivery', '$location', 'Unpaid', NOW(), '$name', $user_id, 'Pending')";
+
 mysqli_query($conn, $order_sql);
 $order_id = mysqli_insert_id($conn);
 

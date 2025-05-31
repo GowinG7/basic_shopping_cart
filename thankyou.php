@@ -88,7 +88,7 @@ if ($order_id) {
         echo "<tr>
                 <th>Product ID</th>
                 <th>Image</th>
-                <th>Price</th>
+                <th>Price after discount and shipping cost</th>
                 <th>Quantity</th>
                 <th>Subtotal</th>
               </tr>";

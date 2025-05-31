@@ -8,7 +8,6 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
-
 $result = mysqli_query($conn, "SELECT * FROM cart_items WHERE user_id = $user_id");
 
 if (!$result || mysqli_num_rows($result) == 0) {
@@ -33,14 +32,12 @@ while ($row = mysqli_fetch_assoc($result)) {
     $items[] = $row;
 }
 
-$txn_uuid = 'TXN' . time();
+$total_amount = ceil($grand_total);
+$txn_uuid = 'TXN' . time() . rand(1000, 9999);
 $product_code = 'EPAYTEST';
-$total_amount = number_format($grand_total, 2, '.', '');
 $secret_key = '8gBm/:&EnhH.1/q';
 $signature_data = "total_amount=$total_amount,transaction_uuid=$txn_uuid,product_code=$product_code";
 $signature = base64_encode(hash_hmac('sha256', $signature_data, $secret_key, true));
-
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -65,13 +62,15 @@ $signature = base64_encode(hash_hmac('sha256', $signature_data, $secret_key, tru
         <option value="Online Payment">Online Payment</option>
     </select><br><br>
 
+    <!-- Important hidden inputs for Cash on Delivery -->
     <input type="hidden" name="txn_uuid" value="<?= $txn_uuid ?>">
-    <input type="hidden" name="grand_total" value="<?= $grand_total ?>">
+    <input type="hidden" name="grand_total" value="<?= $total_amount ?>">
 
     <button type="submit" name="submit_order">Place Order</button>
 </form>
 
-<form id="esewaForm" method="POST" action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" style="display:none;">
+<!-- eSewa Payment Form -->
+<form id="esewaForm" method="POST" action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" >
     <input type="hidden" name="amount" value="<?= $total_amount ?>">
     <input type="hidden" name="tax_amount" value="0">
     <input type="hidden" name="total_amount" value="<?= $total_amount ?>">
@@ -88,15 +87,12 @@ $signature = base64_encode(hash_hmac('sha256', $signature_data, $secret_key, tru
 <script>
 document.getElementById("orderForm").addEventListener("submit", function(e) {
     let paymentOption = document.getElementById("payment_option").value;
-
     if (paymentOption === "Online Payment") {
-        e.preventDefault(); // ✅ Prevent normal form submission
-        document.getElementById("esewaForm").submit(); // ✅ Submit eSewa form instead
+        e.preventDefault(); // Prevent normal form
+        document.getElementById("esewaForm").submit(); // Submit eSewa form
     }
-    // else: it will naturally submit to place_order.php for COD
 });
 </script>
-
 
 </body>
 </html>
