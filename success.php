@@ -2,102 +2,74 @@
 session_start();
 include("dbconnect.php");
 
-// Verify if eSewa sent a response
-if (isset($_REQUEST['data'])) {
-    $data_base64 = $_REQUEST['data'];
-    $decoded_json = base64_decode($data_base64);
-    $res = json_decode($decoded_json, true);
-
-    // Extract response fields
-    $status = $res['status'] ?? '';
-    $txn = $res['transaction_uuid'] ?? '';
-    $product_code = $res['product_code'] ?? '';
-    $amount = $res['total_amount'] ?? '';
-    $transaction_code = $res['transaction_code'] ?? '';
-    $signed_fields = $res['signed_field_names'] ?? '';
-    $provided_signature = $res['signature'] ?? '';
-
-    // ✅ Rebuild message string for HMAC
-    $field_names = explode(',', $signed_fields);
-    $message_parts = [];
-    foreach ($field_names as $field) {
-        if (isset($res[$field])) {
-            $message_parts[] = "$field={$res[$field]}";
-        }
-    }
-    $message = implode(',', $message_parts);
-
-    // ✅ Recalculate HMAC signature
-    $secret_key = "8gBm/:&EnhH.1/q"; // eSewa UAT secret key
-    $expected_signature = base64_encode(hash_hmac('sha256', $message, $secret_key, true));
-
-    if ($provided_signature === $expected_signature && $status === "COMPLETE") {
-        // Proceed with inserting the order
-        if (!isset($_SESSION['user_id'])) {
-            echo "<p>❌ Session expired. Please log in again.</p>";
-            exit();
-        }
-
-        $user_id = $_SESSION['user_id'];
-        $cart_query = mysqli_query($conn, "SELECT * FROM cart_items WHERE user_id = $user_id");
-        if (!$cart_query || mysqli_num_rows($cart_query) == 0) {
-            echo "<p>❌ No cart items found.</p>";
-            exit();
-        }
-
-        $grand_total = 0;
-        $items = [];
-
-        while ($row = mysqli_fetch_assoc($cart_query)) {
-            $price = $row['price'];
-            $discount = $row['discount'];
-            $shipping = $row['shipping'];
-            $qty = $row['quantity'];
-
-            $final_price = $price - ($discount / 100 * $price) + $shipping;
-            $subtotal = $final_price * $qty;
-            $grand_total += $subtotal;
-
-            $items[] = $row;
-        }
-
-        // Insert order
-        $order_sql = "INSERT INTO orders 
-            (grand_total, payment_option, location, payment_status, order_date, name, user_id, order_status, transaction_id)
-            VALUES 
-            ($grand_total, 'Online Payment', 'Online', 'Paid', NOW(), 'Online User', $user_id, 'Pending', '$txn')";
-        mysqli_query($conn, $order_sql);
-        $order_id = mysqli_insert_id($conn);
-
-        // Insert items
-        foreach ($items as $item) {
-            $product_id = $item['product_id'];
-            $image = $item['image'];
-            $qty = $item['quantity'];
-            $price = $item['price'];
-            $discount = $item['discount'];
-            $shipping = $item['shipping'];
-            $final_price = $price - ($discount / 100 * $price) + $shipping;
-            $subtotal = $final_price * $qty;
-
-            $sql = "INSERT INTO order_items 
-                    (order_id, product_id, product_image, price, quantity, subtotal)
-                    VALUES 
-                    ($order_id, $product_id, '$image', $price, $qty, $subtotal)";
-            mysqli_query($conn, $sql);
-        }
-
-        mysqli_query($conn, "DELETE FROM cart_items WHERE user_id = $user_id");
-
-        echo "<h2>✅ Payment Successful</h2>";
-        echo "<p><strong>Transaction ID:</strong> $txn</p>";
-        echo "<p><strong>Order ID:</strong> $order_id</p>";
-        echo "<a href='index.php'>Back to Home</a>";
-    } else {
-        echo "<h3>❌ Signature mismatch or payment not completed.</h3>";
-        echo "<p>Status: $status</p>";
-    }
-} else {
-    echo "<p>❌ No response received from eSewa.</p>";
+if (!isset($_SESSION['user_id'])) {
+    echo "User not logged in.";
+    exit();
 }
+
+$user_id = $_SESSION['user_id'];
+
+// Capture response from eSewa
+$total_amount = $_RESPONSE['total_amount'] ?? '';
+$transaction_uuid = $_RESPONSE['transaction_uuid'] ?? '';
+$product_code = $_RESPONSE['product_code'] ?? '';
+$signed_field_names = $_RESPONSE['signed_field_names'] ?? '';
+$received_signature = $_RESPONSE['signature'] ?? '';
+
+// Secret key
+$secret_key = '8gBm/:&EnhH.1/q';
+
+// Verify HMAC Signature
+$signature_data = '';
+$fields = explode(',', $signed_field_names);
+foreach ($fields as $field) {
+    $signature_data .= "$field=" . $_POST[$field] . ",";
+}
+$signature_data = rtrim($signature_data, ',');
+
+$expected_signature = base64_encode(hash_hmac('sha256', $signature_data, $secret_key, true));
+
+// Check if the signature is valid
+if ($received_signature !== $expected_signature) {
+    echo "<h3>Invalid payment signature. Order rejected.</h3>";
+    exit();
+}
+
+// Fetch cart items
+$cart_query = mysqli_query($conn, "SELECT * FROM cart_items WHERE user_id = $user_id");
+if (!$cart_query || mysqli_num_rows($cart_query) == 0) {
+    echo "Cart is empty or invalid.";
+    exit();
+}
+
+// Get user delivery info (you can store it temporarily in session or request it again)
+$name = $_SESSION['order_name'] ?? 'eSewa User';
+$location = $_SESSION['order_location'] ?? 'eSewa Address';
+
+// Insert into orders
+while ($item = mysqli_fetch_assoc($cart_query)) {
+    $product_id = $item['product_id'];
+    $pname = $item['pname'];
+    $image = $item['image'];
+    $quantity = $item['quantity'];
+    $price = $item['price'];
+    $discount = $item['discount'];
+    $shipping = $item['shipping'];
+
+    $discount_amt = ($discount / 100) * $price;
+    $final_price = $price - $discount_amt;
+    $item_total = $final_price * $quantity;
+
+    mysqli_query($conn, "INSERT INTO orders(user_id, name, location, payment_option, transaction_id, product_id, pname, image, quantity, price, discount, shipping, item_total, grand_total, order_status)
+        VALUES('$user_id', '$name', '$location', 'Online Payment', '$transaction_uuid', '$product_id', '$pname', '$image', '$quantity', '$price', '$discount', '$shipping', '$item_total', '$total_amount', 'Pending')");
+}
+
+// Clear cart
+mysqli_query($conn, "DELETE FROM cart_items WHERE user_id = $user_id");
+
+// Clear temporary session values
+unset($_SESSION['order_name']);
+unset($_SESSION['order_location']);
+
+echo "<h3>✅ Payment successful. Order placed successfully!</h3>";
 ?>
