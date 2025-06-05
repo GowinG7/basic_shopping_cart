@@ -1,84 +1,100 @@
 <?php
 session_start();
-include 'db_connect.php';
+include("dbconnect.php");
 
-$received_fields = $_POST;
-$secret_key = '8gBm/:&EnhH.1/q'; // eSewa secret key
-$signed_fields = explode(",", $_POST['signed_field_names']);
-$data_string = "";
+// Read the response from eSewa
+$raw_input = file_get_contents("php://input");
+$response = json_decode($raw_input, true);
 
-foreach ($signed_fields as $field) {
-    $data_string .= "$field=" . $received_fields[$field] . ",";
-}
-$data_string = rtrim($data_string, ",");
+// Check if the response is valid
+if ($response && isset($response['signature'])) {
+    
+    $transaction_code = $response['transaction_code'];
+    $status = $response['status'];
+    $total_amount = $response['total_amount'];
+    $transaction_uuid = $response['transaction_uuid'];
+    $product_code = $response['product_code'];
+    $signed_fields = $response['signed_field_names'];
+    $signature = $response['signature'];
 
-$expected_signature = hash_hmac('sha256', $data_string, $secret_key, false);
+    // Verify Signature
+    $secret_key = '8gBm/:&EnhH.1/q'; // your secret key
+    $fields = explode(',', $signed_fields);
+    $signed_data = "";
 
-if ($expected_signature === $_POST['signature']) {
-    if (!isset($_SESSION['user_id']) || !isset($_SESSION['name']) || !isset($_SESSION['location'])) {
-        header("Location: displaycart.php");
-        exit();
+    foreach ($fields as $index => $field) {
+        if (isset($response[$field])) {
+            $signed_data .= $field . "=" . $response[$field];
+            if ($index < count($fields) - 1) {
+                $signed_data .= ",";
+            }
+        }
     }
 
-    $user_id = $_SESSION['user_id'];
-    $name = $_SESSION['name'];
-    $location = $_SESSION['location'];
-    $payment_option = "Online Payment";
-    $payment_status = "Paid";
-    $transaction_id = $_POST['transaction_uuid'];
+    $calculated_signature = base64_encode(hash_hmac('sha256', $signed_data, $secret_key, true));
 
-    $cart = mysqli_query($conn, "SELECT * FROM cart_items WHERE user_id = $user_id");
-    if (mysqli_num_rows($cart) == 0) {
-        header("Location: displaycart.php");
-        exit();
+    if ($signature == $calculated_signature && $status == "COMPLETE") {
+
+        // Get session data
+        $user_id = $_SESSION['user_id'];
+        $name = $_SESSION['name'];
+        $location = $_SESSION['location'];
+        $payment_option = "Online Payment";
+
+        // Get cart data
+        $select_cart = mysqli_query($conn, "SELECT * FROM cart_items WHERE user_id = $user_id");
+        $grand_total = 0;
+
+        while ($row = mysqli_fetch_assoc($select_cart)) {
+            $price = $row['price'];
+            $discount = $row['discount'];
+            $shipping = $row['shipping'];
+            $quantity = $row['quantity'];
+
+            $discount_amount = ($discount / 100) * $price;
+            $final_price = $price - $discount_amount + $shipping;
+            $subtotal = $final_price * $quantity;
+            $grand_total += $subtotal;
+        }
+
+        // Insert into orders table
+        $insert_order = mysqli_query($conn, "INSERT INTO orders (grand_total, payment_option, location, payment_status, order_date, name, user_id, order_status, transaction_id)
+        VALUES ($grand_total, '$payment_option', '$location', 'Paid', NOW(), '$name', $user_id, 'Pending', '$transaction_code')");
+
+        if ($insert_order) {
+            $order_id = mysqli_insert_id($conn);
+
+            // Insert order items
+            mysqli_data_seek($select_cart, 0); // reset result pointer
+            while ($row = mysqli_fetch_assoc($select_cart)) {
+                $product_id = $row['product_id'];
+                $image = $row['image'];
+                $price = $row['price'];
+                $discount = $row['discount'];
+                $shipping = $row['shipping'];
+                $quantity = $row['quantity'];
+
+                $discount_amount = ($discount / 100) * $price;
+                $final_price = $price - $discount_amount + $shipping;
+                $subtotal = $final_price * $quantity;
+
+                mysqli_query($conn, "INSERT INTO order_items (order_id, product_id, product_image, price, quantity, subtotal) 
+                VALUES ($order_id, $product_id, '$image', $final_price, $quantity, $subtotal)");
+            }
+
+            // Clear cart
+            mysqli_query($conn, "DELETE FROM cart_items WHERE user_id = $user_id");
+
+            // Redirect to thank you page
+            header("Location: thankyou.php?order_id=$order_id");
+            exit();
+        } else {
+            echo "Order insert failed.";
+        }
+    } else {
+        echo "Signature verification failed or payment not completed.";
     }
-
-    $grand_total = 0;
-    $items = [];
-
-    while ($row = mysqli_fetch_assoc($cart)) {
-        $price = $row['price'];
-        $discount = $row['discount'];
-        $shipping = $row['shipping'];
-        $quantity = $row['quantity'];
-
-        $discount_amt = ($discount / 100) * $price;
-        $final_price = $price - $discount_amt + $shipping;
-        $subtotal = $final_price * $quantity;
-        $grand_total += $subtotal;
-
-        $items[] = [
-            'pid' => $row['product_id'],
-            'image' => $row['image'],
-            'price' => $final_price,
-            'qty' => $quantity,
-            'subtotal' => $subtotal
-        ];
-    }
-
-    // Insert order
-    $order_sql = "INSERT INTO orders 
-    (grand_total, payment_option, location, payment_status, order_date, name, user_id, transaction_id, order_status)
-    VALUES 
-    ($grand_total, '$payment_option', '$location', '$payment_status', NOW(), '$name', $user_id, '$transaction_id', 'Pending')";
-
-    mysqli_query($conn, $order_sql);
-    $order_id = mysqli_insert_id($conn);
-
-    // Insert order items
-    foreach ($items as $item) {
-        $sql = "INSERT INTO order_items (order_id, product_id, product_image, price, quantity, subtotal)
-                VALUES ($order_id, {$item['pid']}, '{$item['image']}', {$item['price']}, {$item['qty']}, {$item['subtotal']})";
-        mysqli_query($conn, $sql);
-    }
-
-    // Clear cart
-    mysqli_query($conn, "DELETE FROM cart_items WHERE user_id = $user_id");
-
-    header("Location: thankyou.php?transaction_id=$transaction_id");
-    exit();
 } else {
-    header("Location: failure.php?reason=Invalid Signature");
-    exit();
+    echo "Invalid payment response.";
 }
 ?>
