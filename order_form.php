@@ -3,6 +3,14 @@ session_start();
 include("dbconnect.php");
 include("header.php");
 
+if (($_SERVER["REQUEST_METHOD"]) == "POST" && isset($_POST["submit_order"])) {
+    //to get the value from the from 
+    $_SESSION['name'] = $_POST["name"];
+    $_SESSION['location'] = $_POST["location"];
+    $_SESSION['payment_option'] = $_POST["payment_option"];
+
+}
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -28,7 +36,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     $final_price = $price - $discount_amt;
     $subtotal = ($final_price * $qty) + $shipping;
 
-    $subtotal_total += $subtotal; // ✅ Correct accumulation
+    $subtotal_total += $subtotal;
 }
 
 
@@ -93,13 +101,10 @@ $signature = base64_encode(hash_hmac('sha256', $signature_data, $secret_key, tru
         <input type="hidden" id="product_code" name="product_code" value="<?= $product_code ?>" required>
         <input type="hidden" id="product_service_charge" name="product_service_charge" value="0" required>
         <input type="hidden" id="product_delivery_charge" name="product_delivery_charge" value="0" required>
-        <input type="hidden" name="success_url"
-            value="https://47ee-103-148-23-225.ngrok-free.app/shopping_cart_session/success.php" required>
-        <input type="hidden" name="failure_url"
-            value="https://47ee-103-148-23-225.ngrok-free.app/shopping_cart_session/failure.php" required>
+        <input type="hidden" name="success_url" value="http://localhost/shopping_cart_session/success.php" required>
+        <input type="hidden" name="failure_url" value="http://localhost/shopping_cart_session/failure.php" required>
 
-        <input type="hidden" name="signed_field_names" value="amount,total_amount,transaction_uuid,product_code"
-            required>
+        <input type="hidden" name="signed_field_names" value="<?= $signed_field_names ?>" required>
 
 
         <input type="hidden" name="signature" value="<?= $signature ?>" required>
