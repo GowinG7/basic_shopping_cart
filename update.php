@@ -10,8 +10,8 @@ if (!isset($_SESSION['user_id'])) {
 
 // When update quantity form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_quantity'])) {
-    $pid = (int)$_POST['pid'];
-    $newQty = (int)$_POST['quantity'];
+    $pid = (int) $_POST['pid'];
+    $newQty = (int) $_POST['quantity'];
 
     // Ensure minimum quantity is 1
     if ($newQty < 1) {

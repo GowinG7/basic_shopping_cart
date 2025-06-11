@@ -20,6 +20,7 @@ if ($order_id) {
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Order Confirmation</title>
     <style>
@@ -28,6 +29,7 @@ if ($order_id) {
             background-color: #f4f4f4;
             padding: 30px;
         }
+
         .thankyou-box {
             background-color: white;
             padding: 25px;
@@ -36,23 +38,29 @@ if ($order_id) {
             margin: auto;
             text-align: center;
         }
+
         table {
             border-collapse: collapse;
             width: 100%;
             margin-top: 20px;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid black;
             padding: 10px;
         }
+
         th {
             color: blue;
         }
+
         img {
             width: 60px;
             height: 60px;
             object-fit: cover;
         }
+
         .btn {
             margin-top: 20px;
             padding: 10px 20px;
@@ -61,31 +69,33 @@ if ($order_id) {
             text-decoration: none;
             border-radius: 5px;
         }
+
         .btn:hover {
             background-color: #388E3C;
         }
     </style>
 </head>
+
 <body>
 
-<div class="thankyou-box">
-    <h2>Thank you for your order!</h2>
+    <div class="thankyou-box">
+        <h2>Thank you for your order!</h2>
 
-    <?php
-    if ($order) {
-        echo "<p>Order ID: <strong>" . htmlspecialchars($order_id) . "</strong></p>";
-        echo "<p>Location: <strong>" . htmlspecialchars($order['location']) . "</strong></p>";
-        echo "<p>Ordered By: <strong>" . htmlspecialchars($order['name']) . "</strong></p>";
+        <?php
+        if ($order) {
+            echo "<p>Order ID: <strong>" . htmlspecialchars($order_id) . "</strong></p>";
+            echo "<p>Location: <strong>" . htmlspecialchars($order['location']) . "</strong></p>";
+            echo "<p>Ordered By: <strong>" . htmlspecialchars($order['name']) . "</strong></p>";
 
-        if (isset($_SESSION['username'])) {
-            echo "<p>Dear <strong>" . htmlspecialchars($_SESSION['username']) . "</strong>, your order has been placed successfully.</p>";
-        } else {
-            echo "<p>We will contact you soon for delivery.</p>";
-        }
+            if (isset($_SESSION['username'])) {
+                echo "<p>Dear <strong>" . htmlspecialchars($_SESSION['username']) . "</strong>, your order has been placed successfully.</p>";
+            } else {
+                echo "<p>We will contact you soon for delivery.</p>";
+            }
 
-        echo "<h3>Ordered Details:</h3>";
-        echo "<table>";
-        echo "<tr>
+            echo "<h3>Ordered Details:</h3>";
+            echo "<table>";
+            echo "<tr>
                 <th>Product ID</th>
                 <th>Image</th>
                 <th>Price after discount and shipping cost</th>
@@ -93,29 +103,30 @@ if ($order_id) {
                 <th>Subtotal</th>
               </tr>";
 
-        foreach ($order_items as $item) {
-            echo "<tr>";
-            echo "<td>" . $item['product_id'] . "</td>";
-            echo "<td><img src='productimage/" . htmlspecialchars($item['product_image']) . "' alt='Product'></td>";
-            echo "<td>Rs. " . number_format($item['price'], 2) . "</td>";
-            echo "<td>" . $item['quantity'] . "</td>";
-            echo "<td>Rs. " . number_format($item['subtotal'], 2) . "</td>";
-            echo "</tr>";
-        }
+            foreach ($order_items as $item) {
+                echo "<tr>";
+                echo "<td>" . $item['product_id'] . "</td>";
+                echo "<td><img src='productimage/" . htmlspecialchars($item['product_image']) . "' alt='Product'></td>";
+                echo "<td>Rs. " . number_format($item['price'], 2) . "</td>";
+                echo "<td>" . $item['quantity'] . "</td>";
+                echo "<td>Rs. " . number_format($item['subtotal'], 2) . "</td>";
+                echo "</tr>";
+            }
 
-        echo "<tr style='color: green;'>
+            echo "<tr style='color: green;'>
                 <td colspan='4'><b>Grand Total</b></td>
                 <td><b>Rs. " . number_format($order['grand_total'], 2) . "</b></td>
               </tr>";
-        echo "</table>";
+            echo "</table>";
 
-    } else {
-        echo "<p><strong>Order details not found.</strong></p>";
-    }
-    ?>
-    <br>
-    <a href="index.php" class="btn">Continue Shopping</a>
-</div>
+        } else {
+            echo "<p><strong>Order details not found.</strong></p>";
+        }
+        ?>
+        <br>
+        <a href="index.php" class="btn">Continue Shopping</a>
+    </div>
 
 </body>
+
 </html>
