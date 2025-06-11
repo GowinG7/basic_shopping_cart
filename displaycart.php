@@ -137,6 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['update_quantity'])) {
                                     style="display:none;">Update</button>
                             </form>
                         </td>
+                        <td>Rs. <?php echo number_format($total, 2); ?></td>
 
                         <td>
                             <a href="remove.php?pid=<?php echo $row['product_id']; ?>" class="btn"
