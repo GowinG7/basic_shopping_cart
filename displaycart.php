@@ -29,52 +29,57 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['update_quantity'])) {
 
 <head>
     <title>My Cart</title>
-    <style>
-        body {
-            font-family: Arial;
-            margin: 0;
-            padding: 0;
-        }
+  <style>
+    body {
+        font-family: Arial;
+        margin: 0;
+        padding: 0;
+    }
 
-        .cart-container {
-            margin: 30px;
-        }
+    .cart-container {
+        margin: 30px auto;
+        max-width: 1100px;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
-        }
+    .table-responsive {
+        overflow-x: auto;
+    }
 
-        th,
-        td {
-            border: 1px solid black;
-            padding: 10px;
-            text-align: center;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        /* min-width: 800px; */ /* Remove or adjust this if needed */
+    }
 
-        th {
-            color: blue;
-        }
+    th,
+    td {
+        border: 1px solid black;
+        padding: 10px;
+        text-align: center;
+    }
 
-        .img-thumb {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-        }
+    th {
+        color: blue;
+    }
 
-        .btn {
-            padding: 8px 14px;
-            background-color: #45a049;
-            color: white;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-        }
+    .img-thumb {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
 
-        .btn:hover {
-            background-color: #3d8b40;
-        }
+    .btn {
+        padding: 8px 14px;
+        background-color: #45a049;
+        color: white;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn:hover {
+        background-color: #3d8b40;
+    }
     </style>
 </head>
 
