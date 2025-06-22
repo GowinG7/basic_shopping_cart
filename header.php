@@ -1,6 +1,9 @@
 <style>
   body {
+<<<<<<< HEAD
     box-sizing: border-box;
+=======
+>>>>>>> a6e41553e899c6f72e50363a7f8f9d5a166bb2d0
     margin: 0;
     padding: 0;
   }
@@ -45,9 +48,14 @@
   </div>
 
   <div class="user-info">
+<<<<<<< HEAD
     <?php
     if (isset($_SESSION['user_id'])) {
       echo '<span>Welcome, ' . htmlspecialchars($_SESSION['nam']) . '</span>';
+=======
+    <?php if (isset($_SESSION['user_id'])) {
+      echo '<span>Welcome, ' . htmlspecialchars($_SESSION['username']) . '</span>';
+>>>>>>> a6e41553e899c6f72e50363a7f8f9d5a166bb2d0
       echo '<a href="logout.php">Logout</a>';
     } else {
       echo '<a href="login.php">Login</a>';
