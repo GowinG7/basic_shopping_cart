@@ -3,16 +3,9 @@ session_start();
 include("dbconnect.php");
 include("header.php");
 
-<<<<<<< HEAD
 if (($_SERVER["REQUEST_METHOD"]) == "POST" && isset($_POST["submit_order"])) {
     //to get the value from the from 
     $_SESSION['nam'] = $_POST["name"];
-=======
-
-// Save order details to session only for Cash on Delivery (normal form submit)
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit_order"]) && $_POST["payment_option"] === "Cash on Delivery") {
-    $_SESSION['name'] = $_POST["name"];
->>>>>>> a6e41553e899c6f72e50363a7f8f9d5a166bb2d0
     $_SESSION['location'] = $_POST["location"];
     $_SESSION['payment_option'] = $_POST["payment_option"];
 }
@@ -89,7 +82,6 @@ $signature = base64_encode(hash_hmac('sha256', $signature_data, $secret_key, tru
 
     <!-- eSewa Payment Form -->
     <form id="esewaForm" action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" method="POST">
-<<<<<<< HEAD
         <input type="hidden" id="amount" name="amount" value="<?= $total_amount ?>" required>
         <input type="hidden" id="tax_amount" name="tax_amount" value="0" required>
         <input type="hidden" id="total_amount" name="total_amount" value="<?= $total_amount ?>" required>
@@ -106,20 +98,6 @@ $signature = base64_encode(hash_hmac('sha256', $signature_data, $secret_key, tru
         <input type="hidden" name="signature" value="<?= $signature ?>" required>
         <input value="Submit" name="submit_order" type="submit">
 
-=======
-        <input type="hidden" name="amount" value="<?= $total_amount ?>">
-        <input type="hidden" name="tax_amount" value="0">
-        <input type="hidden" name="total_amount" value="<?= $total_amount ?>">
-        <input type="hidden" name="transaction_uuid" value="<?= $transaction_id ?>">
-        <input type="hidden" name="product_code" value="<?= $product_code ?>">
-        <input type="hidden" name="product_service_charge" value="0">
-        <input type="hidden" name="product_delivery_charge" value="0">
-        <input type="hidden" name="success_url" value="http://localhost/shopping_cart_session/success.php">
-        <input type="hidden" name="failure_url" value="http://localhost/shopping_cart_session/failure.php">
-        <input type="hidden" name="signed_field_names" value="<?= $signed_field_names ?>">
-        <input type="hidden" name="signature" value="<?= $signature ?>">
-        <input value="Submit" type="submit">
->>>>>>> a6e41553e899c6f72e50363a7f8f9d5a166bb2d0
     </form>
 
 
@@ -128,7 +106,6 @@ $signature = base64_encode(hash_hmac('sha256', $signature_data, $secret_key, tru
             var paymentOption = document.getElementById("payment_option").value;
             if (paymentOption === "Online Payment") {
                 e.preventDefault();
-<<<<<<< HEAD
                 // Collect form data
                 var formData = new FormData(document.getElementById("orderForm"));
                 // Send data to server to set session
@@ -139,22 +116,6 @@ $signature = base64_encode(hash_hmac('sha256', $signature_data, $secret_key, tru
                     // After saving session, submit eSewa form
                     document.getElementById("esewaForm").submit();
                 });
-=======
-                document.getElementById("submitBtn").disabled = true; // Prevent double submit
-
-                // Save user details to session via AJAX (asynchronously)
-                var name = document.querySelector('[name="name"]').value;
-                var location = document.querySelector('[name="location"]').value;
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "save_order_session.php", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                        document.getElementById("esewaForm").submit();
-                    }
-                };
-                xhr.send("name=" + encodeURIComponent(name) + "&location=" + encodeURIComponent(location) + "&payment_option=Online Payment");
->>>>>>> a6e41553e899c6f72e50363a7f8f9d5a166bb2d0
             }
         });
     </script>

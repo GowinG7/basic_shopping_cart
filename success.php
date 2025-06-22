@@ -2,7 +2,6 @@
 session_start();
 include("dbconnect.php");
 
-<<<<<<< HEAD
 
 
 // Debugging (optional - remove in production)
@@ -15,13 +14,6 @@ echo "</pre>";
 //     echo "Session expired. Please log in again.";
 //     exit();
 // }
-=======
-// 1. Check if user session data is available
-if (!isset($_SESSION['user_id'], $_SESSION['name'], $_SESSION['location'])) {
-    echo "Session expired. Please log in again.";
-    exit();
-}
->>>>>>> a6e41553e899c6f72e50363a7f8f9d5a166bb2d0
 
 // 2. Check if eSewa sent payment data
 if (isset($_REQUEST['data'])) {
@@ -30,7 +22,6 @@ if (isset($_REQUEST['data'])) {
     $response_json = base64_decode($response_base64);
     $response = json_decode($response_json, true);
 
-<<<<<<< HEAD
     // Extract response fields
     $transaction_code = $response['transaction_code'];
     $status = $response['status'];
@@ -39,16 +30,6 @@ if (isset($_REQUEST['data'])) {
     $product_code = $response['product_code'];
     $signed_fields_names = $response['signed_field_names'];
     $provided_signature = $response['signature'];
-=======
-    // 4. Get important fields from the response
-    $transaction_code = $response['transaction_code'] ?? '';
-    $status = $response['status'] ?? '';
-    $total_amount = $response['total_amount'] ?? '';
-    $transaction_uuid = $response['transaction_uuid'] ?? '';
-    $product_code = $response['product_code'] ?? '';
-    $signed_fields_names = $response['signed_field_names'] ?? '';
-    $provided_signature = $response['signature'] ?? '';
->>>>>>> a6e41553e899c6f72e50363a7f8f9d5a166bb2d0
 
     // 5. Create the signature string and compare with eSewa's signature
     $secret_key = '8gBm/:&EnhH.1/q'; // Your eSewa secret key
