@@ -15,7 +15,7 @@ if ($_POST['payment_option'] === 'Online Payment') {
     exit();
 }
 
-$_SESSION['name'] = $_POST['name'];
+$_SESSION['nam'] = $_POST['name'];
 $_SESSION['location'] = $_POST['location'];
 $_SESSION['payment_option'] = $_POST['payment_option'];
 

@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
         if (password_verify($pass, $row['password'])) {
             $_SESSION['user_id'] = $row['id'];
             $_SESSION['username'] = $row['username'];
-            $_SESSION['name'] = $row['name'];
+            $_SESSION['nam'] = $row['name'];
             header("Location: index.php");
             exit();
         } else {

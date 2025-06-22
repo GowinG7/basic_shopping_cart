@@ -5,7 +5,7 @@ include("header.php");
 
 if (($_SERVER["REQUEST_METHOD"]) == "POST" && isset($_POST["submit_order"])) {
     //to get the value from the from 
-    $_SESSION['name'] = $_POST["name"];
+    $_SESSION['nam'] = $_POST["name"];
     $_SESSION['location'] = $_POST["location"];
     $_SESSION['payment_option'] = $_POST["payment_option"];
 
@@ -15,6 +15,8 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
+
 
 $user_id = $_SESSION['user_id'];
 $result = mysqli_query($conn, "SELECT * FROM cart_items WHERE user_id = $user_id");
@@ -101,26 +103,35 @@ $signature = base64_encode(hash_hmac('sha256', $signature_data, $secret_key, tru
         <input type="hidden" id="product_code" name="product_code" value="<?= $product_code ?>" required>
         <input type="hidden" id="product_service_charge" name="product_service_charge" value="0" required>
         <input type="hidden" id="product_delivery_charge" name="product_delivery_charge" value="0" required>
-        <input type="hidden" name="success_url" value="http://localhost/shopping_cart_session/success.php" required>
-        <input type="hidden" name="failure_url" value="http://localhost/shopping_cart_session/failure.php" required>
+        <input type="hidden" name="success_url" value="http://localhost/shoppingcart/success.php" required>
+        <input type="hidden" name="failure_url" value="http://localhost/shoppingcart/failure.php" required>
 
         <input type="hidden" name="signed_field_names" value="<?= $signed_field_names ?>" required>
 
 
         <input type="hidden" name="signature" value="<?= $signature ?>" required>
-        <input value="Submit" type="submit">
+        <input value="Submit" name="submit_order" type="submit">
 
     </form>
+
 
     <script>
         document.getElementById("orderForm").addEventListener("submit", function (e) {
             var paymentOption = document.getElementById("payment_option").value;
             if (paymentOption === "Online Payment") {
                 e.preventDefault();
-                document.getElementById("esewaForm").submit(); // Submit in same window
+                // Collect form data
+                var formData = new FormData(document.getElementById("orderForm"));
+                // Send data to server to set session
+                fetch('save_order_session.php', {
+                    method: 'POST',
+                    body: formData
+                }).then(function (response) {
+                    // After saving session, submit eSewa form
+                    document.getElementById("esewaForm").submit();
+                });
             }
         });
-
     </script>
 
 

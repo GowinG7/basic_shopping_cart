@@ -6,14 +6,14 @@ include("dbconnect.php");
 
 // Debugging (optional - remove in production)
 echo "<pre>";
-print_r($_SESSION);
+print_r($_REQUEST);
 echo "</pre>";
 
-// Check session
-if (!isset($_SESSION['user_id'], $_SESSION['name'], $_SESSION['location'])) {
-    echo "Session expired. Please log in again.";
-    exit();
-}
+// // Check session
+// if (!isset($_SESSION['user_id'], $_SESSION['name'], $_SESSION['location'])) {
+//     echo "Session expired. Please log in again.";
+//     exit();
+// }
 
 if (isset($_REQUEST['data'])) {
     $response_base64 = $_REQUEST['data'];
@@ -24,7 +24,7 @@ if (isset($_REQUEST['data'])) {
     $transaction_code = $response['transaction_code'];
     $status = $response['status'];
     $total_amount = $response['total_amount'];
-    $transaction_uuid = $response['transaction_uuid']; 
+    $transaction_uuid = $response['transaction_uuid'];
     $product_code = $response['product_code'];
     $signed_fields_names = $response['signed_field_names'];
     $provided_signature = $response['signature'];
